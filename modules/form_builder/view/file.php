@@ -1,0 +1,1 @@
+<input type="file" id="<?php echo $input->id; ?>" name="<?php echo $input->name; ?>"<?php foreach( $input->options as $key=>$value ){ echo ( is_numeric( $key ) )?' '.$value:' '.$key.'="'.$value.'"'; } ?>>

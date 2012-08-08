@@ -1,0 +1,3 @@
+<?php $input_value = ( $input->orm_object AND $input->orm_object->{$input->name} !== NULL )?$input->orm_object->{$input->name}:$input->default_value; ?>
+<input type="text" id="<?php echo $input->id; ?>_date" name="<?php echo $input->name; ?>[date]" value="<?php echo form_format( 'date', $input_value ); ?>"<?php foreach( $input->options as $key=>$value ){ echo ( is_numeric( $key ) )?' '.$value:' '.$key.'="'.$value.'"'; } ?>>
+<input type="text" id="<?php echo $input->id; ?>_time" name="<?php echo $input->name; ?>[time]" value="<?php echo form_format( 'time', $input_value ); ?>"<?php foreach( $input->options as $key=>$value ){ echo ( is_numeric( $key ) )?' '.$value:' '.$key.'="'.$value.'"'; } ?>>

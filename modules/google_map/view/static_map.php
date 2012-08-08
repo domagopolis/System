@@ -1,0 +1,1 @@
+<img id="static-map" src="http://maps.google.com/maps/api/staticmap?center=<?php echo $location; ?>&amp;zoom=<?php echo $zoom; ?>&amp;markers=<?php echo $location; ?>&amp;size=<?php echo $width; ?>x<?php echo $height; ?>&amp;sensor=<?php echo $sensor; ?>" alt="<?php echo $alt; ?>" />

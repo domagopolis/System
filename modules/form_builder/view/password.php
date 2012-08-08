@@ -1,0 +1,1 @@
+<input type="password" id="<?php echo $input->id; ?>" name="<?php echo $input->name; ?>" value=""<?php foreach( $input->options as $key=>$value ){ echo ( is_numeric( $key ) )?' '.$value:' '.$key.'="'.$value.'"'; } ?> />

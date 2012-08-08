@@ -1,0 +1,1 @@
+<button type="submit" id="<?php echo $input->id; ?>" name="<?php echo $input->name; ?>" value="<?php echo $input->name; ?>"<?php foreach( $input->options as $key=>$value ){ echo ( is_numeric( $key ) )?' '.$value:' '.$key.'="'.$value.'"'; } ?>><?php echo ucwords( str_replace( "_", " ", ( $input->default_value )?$input->default_value:$input->name ) ); ?></button>
