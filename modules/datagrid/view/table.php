@@ -1,4 +1,4 @@
-<?php if( array_key_exists( "add-record", $this->options ) ){ ?>
+<?php if( $this->options['add-record'] ){ ?>
 <form class="datagrid-add-record" id="datagrid-add-record" name="datagrid_add_record" method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 <button type="submit" name="add" value="add"><?php echo $this->options['add-record']; ?></button>
 </form>
@@ -16,7 +16,7 @@ foreach( $this->orm_objects->{$this->orm_objects->object_data_arr} as $object_it
       }
    }
 ?>
-<?php if( array_key_exists( "table_form_submit", $this->options ) ){ ?>
+<?php if( sizeof( $this->options['table_form_submit'] ) ){ ?>
 <form class="datagrid-table-form" id="datagrid_form" name="form" method="post" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
 <?php } ?>
 
@@ -30,36 +30,43 @@ foreach( $this->orm_objects->{$this->orm_objects->object_data_arr} as $object_it
 <?php
 $table_heading_displayed = FALSE;
 $cols = 0;
-if( array_key_exists( 'totals',  $this->options ) ){
-   foreach( $this->options['totals'] as $total ){
-      $col_total[$total] = 0;
-      }
+foreach( $this->options['totals'] as $total ){
+   $col_total[$total] = 0;
    }
    
 foreach( $this->orm_objects->{$this->orm_objects->object_data_arr} as $object_item ){
-   if( !$table_heading_displayed ){
+   $cols = 0;
+   foreach( $object_item->selected_fields as $field_heading ){
+      if( $object_item->id_field !== $field_heading AND preg_match( '/([A-Za-z0-9]+)(_id)\Z/i', $field_heading ) ){
+         //Get relations with the plural of table heading
+         $this->orm_objects->{text::plural( preg_replace( '/([A-Za-z0-9]+)(_id)\Z/i', '$1', $field_heading ) )};
+      }
+      $cols++;
+   if( $field_heading === $object_item->id_field AND $this->options['select'] ){
+      $select_col = $cols;
+      }
+   }
+   if( $this->options['show_table_heading'] AND !$table_heading_displayed ){
 ?>
 <tr>
 <?php
 foreach( $object_item->selected_fields as $field_heading ){
    if( $object_item->id_field !== $field_heading AND preg_match( '/([A-Za-z0-9]+)(_id)\Z/i', $field_heading ) ){
       $table_heading = preg_replace( '/([A-Za-z0-9]+)(_id)\Z/i', '$1', $field_heading );
-      //Get relations with the plural of table heading
-      $this->orm_objects->{text::plural( $table_heading )};
    }else{
       $table_heading = $field_heading;
    }
    ?>
 <?php if( $field_heading === $object_item->id_field ){ ?>
-<?php if( array_key_exists( "select", $this->options ) ){ $cols++; ?>
-<th>Select</th>
+<?php if( $this->options['select'] ){ ?>
+<th><?php echo ucwords( $this->options['select'] ); ?></th>
 <?php } ?>
 <?php if( array_key_exists( "update-record", $this->options ) AND is_array( $this->options['update-record'] ) ){ ?>
-<?php foreach( $this->options['update-record'] as $key => $value ){ $cols++; ?>
+<?php foreach( $this->options['update-record'] as $key => $value ){ ?>
 <th><?php echo ucwords( $key ) ?></th>
 <?php } ?>
 <?php } ?>
-<?php }else{ $cols++; ?>
+<?php }else{ ?>
 <th><?php echo ucwords( str_replace( "_", " ", $table_heading ) ); ?></th>
 <?php } ?>
 <?php
@@ -77,18 +84,16 @@ foreach( $object_item->selected_fields as $field_heading ){
 <?php
 foreach( $object_item->selected_fields as $field_heading ){
 
-   if( array_key_exists( 'totals',  $this->options ) ){
-      foreach( $this->options['totals'] as $total ){
-         if( $total === $field_heading ){
-            $col_total[$total] += $object_item->$field_heading;
-            }
+   foreach( $this->options['totals'] as $total ){
+      if( $total === $field_heading ){
+         $col_total[$total] += $object_item->$field_heading;
          }
       }
 ?>
 <?php if( $object_item->$field_heading === '' ){ //If property is empty ?>
 <td>&nbsp;</td>
 <?php }else if( $field_heading === $object_item->id_field ){ //If property is object id ?>
-<?php if( array_key_exists( "select", $this->options ) ){ //If select checkbox required ?>
+<?php if( $this->options['select'] ){ //If select checkbox required ?>
 <td align="center">
 <input type=checkbox id="selectGroup" name="select[<?php echo $object_item->$field_heading; ?>]" value="yes"<?php if(FALSE){ echo " checked"; } ?>>
 </td>
@@ -119,7 +124,7 @@ foreach( $object_item->selected_fields as $field_heading ){
 <td><?php echo datagrid_format( $this->options['format'][$field_heading], $object_item->$field_heading ); ?></td>
 <?php }else if( array_key_exists( "record-link", $this->options ) AND array_key_exists( $field_heading, $this->options['record-link'] ) ){ //If a link needs to be attached to this field ?>
 <td><a href="<?php echo $this->options['record-link'][$field_heading]; ?>?<?php echo $object_item->id_field; ?>=<?php echo $object_item->{$object_item->id_field}; ?>"><?php echo $object_item->$field_heading; ?></a></td>
-<?php }else if( array_key_exists( "editable-fields", $this->options ) AND array_key_exists( $field_heading, $this->options['editable-fields'] ) ){ //If this property is editable ?>
+<?php }else if( array_key_exists( $field_heading, $this->options['editable-fields'] ) ){ //If this property is editable ?>
 <td>
 <form class="<?php echo $this->options['editable-fields'][$field_heading]; ?>_<?php echo $field_heading; ?>" id="<?php echo $this->options['editable-fields'][$field_heading]; ?>_<?php echo $field_heading; ?>" name="form" method="post" action="<?php if( array_key_exists( "search", $_GET ) ){ echo $_SERVER['REQUEST_URI']; }else{ echo $_SERVER['SCRIPT_NAME']."?";?><?php foreach( $record_id_arr as $key => $value ){ echo $object_item->id_field."[field_in][".$value."]=".$value."&"; } ?>search=Search<?php } ?>">
 <input type="hidden" name="<?php echo $object_item->id_field; ?>" value="<?php echo $object_item->{$object_item->id_field}; ?>" />
@@ -133,7 +138,6 @@ foreach( $object_item->selected_fields as $field_heading ){
 <?php } ?>
 </tr>
 <?php } ?>
-<?php if( array_key_exists( 'totals',  $this->options ) ){ ?>
 <?php foreach( $this->options['totals'] as $key => $total ){ ?>
 <?php ( empty( $table_row_class ) OR $table_row_class === "even" )?$table_row_class = "odd":$table_row_class = "even";?>
 <tr class="<?php echo $table_row_class; ?>">
@@ -141,9 +145,21 @@ foreach( $object_item->selected_fields as $field_heading ){
 <td><?php echo ( array_key_exists( "format", $this->options ) AND array_key_exists( $total, $this->options['format'] ) )?$col_total[$total]:$col_total[$total]; ?></td>
 </tr>
 <?php } ?>
+<?php if( $this->options['select'] ){ //if select checkbox used add select all checkbox ?>
+<tr>
+<?php if( $select_col > 1 ){ ?>
+<td align="right"<?php if( $select_col - 1 > 1 ){ ?> colspan="<?php echo ( $select_col - 1 ); ?>"<?php } ?>>Select All</td>
+<?php } ?>
+<td align="center">
+<input type=checkbox id="select_all" name="select-all" value="yes">
+</td>
+<?php if( $select_col < $cols ){ ?>
+<td align="left"<?php if( $cols - $select_col > 1 ){ ?> colspan="<?php echo $cols - $select_col; ?>"<?php } ?>>Select All</td>
+<?php } ?>
+</tr>
 <?php } ?>
 </table>
-<?php if( array_key_exists( "table_form_submit", $this->options ) ){ ?>
+<?php if( sizeof( $this->options['table_form_submit'] ) ){ ?>
 <?php foreach ( $this->options['table_form_submit'] as $key => $value ){ ?>
 <button type="submit" name="<?php echo $key; ?>" value="<?php echo $value; ?>"><?php echo $value; ?></button>
 <?php } ?>

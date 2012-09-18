@@ -4,11 +4,7 @@ class datagrid{
 public $orm_objects_pagination;
 public $orm_objects;
 public $rows_per_page;
-public $options = array(
-                     'update-record' => array(), // Edit button with record id Button Title => Get or Post
-                     'format'  => array(), // date formats and decimal points Field Name => format type
-                     'record-link' => array() // record link to view record details Field Name => URL
-                     );
+public $options = array();
 public $filename;
 
 public function __construct( $orm_objects, $options = array() ){
@@ -18,7 +14,19 @@ public function __construct( $orm_objects, $options = array() ){
 
    $this->orm_objects = $orm_objects;
    
-   $this->options = $options;
+   $this->options = array(
+                     'add-record' => FALSE, //False or string post variable for add record button
+                     'update-record' => array(), //Edit/Delete or other record update button with record id Button Title => Get or Post
+                     'editable-fields' => array(), //Editable column of data Field name => Button label
+                     'select' => FALSE, //False or string table heading for select boxes
+                     'table_form_submit' => array(), //Table submit buttons. Input Name => button label
+                     'totals' => array(), //Array of field names to calculate totals on last row
+                     'format' => array(), // date formats and decimal points Field Name => format type
+                     'record-link' => array(), // record link to view record details Field Name => URL without $_GET params
+                     'show_table_heading' => TRUE, //Boolean to show table heading or not
+                     );
+
+   $this->options = array_merge( $this->options, $options );
    $this->filename = $this->orm_objects->table.'_database.csv';
 
    $this->rows_per_page = 15;
