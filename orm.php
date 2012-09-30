@@ -40,11 +40,8 @@ class orm{
       //If id given find and load the record
       if( $id_value ){
          $this->where( array( $this->id_field => $id_value ) )->find();
-
-         return $this;
-      }else{
-         return $this;
          }
+      return $this;
       }
 
    public function __get( $key ){
@@ -335,12 +332,14 @@ class orm{
       }
 
    //Method to add a join from $table1 to $table2, $join_type can be left, right, etc
-   public function join( $table1, $table2=FALSE, $join_type=0 ){
+   public function join( $table1, $table2=FALSE, $join_type=FALSE, $foreign_key=FALSE ){
       if( !$table2 ){
          $table2 = $this->table;
          }
+         
+      $join = array( 'join_type' => $join_type, 'foreign_key' => $foreign_key );
 
-      $join_arr = array( $table1 => array( $table2 => $join_type ) );
+      $join_arr = array( $table1 => array( $table2 => $join ) );
 
       $this->join_arr = array_merge( $this->join_arr, $join_arr );
       
@@ -382,12 +381,14 @@ class orm{
       if( sizeof( $this->join_arr ) > 0 ){
          $join_sql = '';
          foreach( $this->join_arr as $table1 => $joining ){
-            foreach( $joining as $table2 => $join_type ){
+            foreach( $joining as $table2 => $join ){
                if( strstr( $select_sql, "FROM ".$table2 ) OR strstr( $join_sql, "JOIN ".$table2 ) ){
-                  $join_sql .= ( ( is_string( $join_type ) )?" ".strtoupper( $join_type ):"" )." JOIN ".$table1." ON ".$table2.".".text::singular($table1)."_id = ".$table1.".".text::singular($table1)."_id ";
+                  $join_sql .= ( ( array_key_exists( 'join_type', $join ) AND is_string( $join['join_type'] ) )?" ".strtoupper( $join['join_type'] ):"" )." JOIN ".$table1;
                }else{
-                  $join_sql .= ( ( is_string( $join_type ) )?" ".strtoupper( $join_type ):"" )." JOIN ".$table2." ON ".$table2.".".text::singular($table1)."_id = ".$table1.".".text::singular($table1)."_id ";
+                  $join_sql .= ( ( array_key_exists( 'join_type', $join ) AND is_string( $join['join_type'] ) )?" ".strtoupper( $join['join_type'] ):"" )." JOIN ".$table2;
                   }
+               $foreign_key = ( array_key_exists( 'join_type', $join ) AND is_string( $join['foreign_key'] ) )?$join['foreign_key']:text::singular($table1)."_id";
+               $join_sql .= " ON ".$table2.".".$foreign_key." = ".$table1.".".text::singular($table1)."_id ";
                }
             }
          }
@@ -475,9 +476,11 @@ class orm{
             }
             
          $value = $this->prepare_data( $value );
-            
-         if( preg_match( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).'.preg_replace( '/([A-Za-z0-9]+)([<>=]+| IN)/i', '$1', $key ).' (.*)/i', $join_sql ) ){
-            $key_table = preg_replace( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).'.preg_replace( '/([A-Za-z0-9]+)([<>=]+| IN)/i', '$1', $key ).' (.*)/i', '$2.', $join_sql );
+         $field = preg_replace( '/([A-Za-z0-9_]+)([<>=]+| IN)/i', '$1', $key );
+         if( preg_match( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).'.$field.' (.*)/i', $join_sql ) ){
+            $key_table = preg_replace( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).'.$field.' (.*)/i', '$3.', $join_sql );
+         }else if( preg_match( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).([A-Za-z0-9_]+) = ([A-Za-z0-9_]+).'.$field.' (.*)/i', $join_sql ) ){
+            $key_table = preg_replace( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).([A-Za-z0-9_]+) = ([A-Za-z0-9_]+).'.$field.' (.*)/i', '$5.', $join_sql );
          }else{
             $key_table = "";
             }
@@ -485,14 +488,14 @@ class orm{
          if( $key === "password" ){
             $clause_sql .= $key_table.$key." = PASSWORD('".$value."') ".strtoupper( $boolean_operator )." ";
          }else if( $key != 'or' ){
-            if( preg_match( '/([A-Za-z0-9]+)([<>=]+)/i', $key ) ){
-               $clause_sql .= $key_table.preg_replace( '/([A-Za-z0-9]+)([<>=]+)/i', '$1 $2', $key )." '".$value."' ".strtoupper( $boolean_operator )." ";
+            if( preg_match( '/([A-Za-z0-9_]+)([<>=]+)/i', $key ) ){
+               $clause_sql .= $key_table.$field." ".preg_replace( '/([A-Za-z0-9_]+)([<>=]+)/i', '$2', $key )." '".$value."' ".strtoupper( $boolean_operator )." ";
             }else if( preg_match( '/%(.*)%/i', $value ) ){
-               $clause_sql .= $key_table.$key." LIKE '".$value."' ".strtoupper( $boolean_operator )." ";
-            }else if( preg_match( '/([A-Za-z0-9]+)( IN)/i', $key ) ){
-               $clause_sql .= $key_table.preg_replace( '/([A-Za-z0-9]+)( IN)/i', '$1', $key )." IN (".$value.") ".strtoupper( $boolean_operator )." ";
+               $clause_sql .= $key_table.$field." LIKE '".$value."' ".strtoupper( $boolean_operator )." ";
+            }else if( preg_match( '/([A-Za-z0-9_]+)( IN)/i', $key ) ){
+               $clause_sql .= $key_table.$field." IN (".$value.") ".strtoupper( $boolean_operator )." ";
             }else{
-               $clause_sql .= $key_table.$key." = '".$value."' ".strtoupper( $boolean_operator )." ";
+               $clause_sql .= $key_table.$field." = '".$value."' ".strtoupper( $boolean_operator )." ";
                }
             }
          }
