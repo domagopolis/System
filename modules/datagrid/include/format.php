@@ -9,8 +9,12 @@ function datagrid_format( $format, $value ){
       case "datetime": $value = date( "d/m/Y H:i", $value ); break;
       case "time": $value = date( "H:i", $value ); break;
       case "text_limit": $value = text::limit_words( $value, 10 ); break;
-      case "image": $value = '<img src='.$value.' alt="'.$value.'" />';
+      case "image": if( is_string( $value ) ){ $value = '<img src='.$value.' alt="'.$value.'" />'; }
       }
+      
+   if( empty( $value ) ){
+      $value = '&nbsp;';
+   }
 
    return $value;
    }
