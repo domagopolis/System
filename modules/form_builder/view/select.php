@@ -5,7 +5,7 @@
 <?php $selected = TRUE; ?>
 <?php }else if( $input->orm_object AND is_array( $input->orm_object->{$input->name} ) AND in_array( (string)$key, $input->orm_object->{$input->name} ) ){ ?>
 <?php $selected = TRUE; ?>
-<?php }else if( $input->default_value === (string)$key ){ ?>
+<?php }else if( (string)$input->default_value === (string)$key ){ ?>
 <?php $selected = TRUE; ?>
 <?php }else{ ?>
 <?php $selected = FALSE; ?>
