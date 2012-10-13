@@ -42,6 +42,17 @@ class image{
    public function get_image_paths(){
       return $this->path_arr;
       }
+
+   public function get_filenames(){
+      $image_file_name_arr = $this->get_image_file_names();
+      $filename_arr = array();
+
+      foreach( $image_file_name_arr as $key => $image_file_name ){
+         $filename_arr[$key] = $image_file_name;
+         }
+
+      return $filename_arr;
+      }
       
    public function get_path_and_images(){
       $image_file_name_arr = $this->get_image_file_names();
