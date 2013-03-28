@@ -60,6 +60,12 @@ class social_sharing{
       return $link;
       }
       
+   public function get_googleplus_link(){
+      $link = 'https://plus.google.com/share?url='.$this->url;
+      
+      return $link;
+      }
+      
    public function get_stumbleupon_link(){
       $link = 'http://www.stumbleupon.com/submit?url='.$this->url;
 
