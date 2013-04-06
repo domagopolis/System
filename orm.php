@@ -522,7 +522,7 @@ class orm{
       $table = $table1."_".$table2;
 
       //Find which table comes first in alphabetical order
-      if( strcmp( $table1, $table2 ) === -1 ){
+      if( strcmp( $table1, $table2 ) < 0 ){
          $table = $table1."_".$table2;
       }else{
          $table = $table2."_".$table1;
