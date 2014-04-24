@@ -9,7 +9,7 @@ class instagram{
 
    private $url;
    private $user_id;
-   private $token;
+   private $token = '26095651.ab103e5.ea074de5e262426caaf53e48b1c56018';
    private $type;
    
    public function __construct( $user_id=NULL, $token=NULL, $type=NULL ){
@@ -31,7 +31,9 @@ class instagram{
       }
       
    public function get_images( $count=10){
-
+	$this->url = 'https://api.instagram.com/v1/users/'.$this->user_id.'/media/recent/?access_token='.$this->token.'&count='.$count;
+	
+	return $this->process();
       }
    
    private function process( $postargs=false ){
