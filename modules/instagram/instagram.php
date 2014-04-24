@@ -12,7 +12,7 @@ class instagram{
    private $token;
    private $type;
    
-   public function __construct( $user_id=NULL, $type=NULL ){
+   public function __construct( $user_id=NULL, $token=NULL, $type=NULL ){
       $this->user_id = $user_id;
       $this->token = $token;
       if( $type ){
