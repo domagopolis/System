@@ -56,6 +56,21 @@ class abn_lookup{
 
       return $this->result;
       }
+      
+   public function search_by_name( $name=FALSE ){
+      if(!$name and !$this->result){
+         return FALSE;
+      }
+      
+      if( !$this->result ){
+         $param = array( 'name' => $name, 'authenticationGuid' => $this->authentication_guid, 'filters' => array() );
+         if( !$this->call_search_by_name( $param ) ){
+            return FALSE;
+         }
+      }
+      
+      return $this->result;
+   }
 
    public function validate( $abn=FALSE ){
       if( !$abn AND !$this->result ){
@@ -158,6 +173,13 @@ class abn_lookup{
 
       return $this->result;
       }
+      
+   private function call_search_by_name( $param=array() ){
+      $this->result = $this->client->__call('ABRSearchByName', array('parameters' => $param));
+      
+      return $this->result;
+      }
+   }
    
    }
 ?>
