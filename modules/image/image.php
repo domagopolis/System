@@ -174,4 +174,28 @@ class image{
       return $this->extension;
       }
    }
+   
+   public function is_transparent(){
+   	if( !$this->image_resource ) return FALSE;
+   	
+   	for( $x=0; $x<=$this->width; $x++ ){
+   		for( $y=0; $y<=$this->height; $y++ ){
+   			$colour_arr = $this->get_pixel_colour( $x, $y );
+   			if( $colour_arr["alpha"] === 127 ){
+   				return TRUE;
+   				}
+   			}
+   		}
+   	return FALSE;
+   	}
+   	
+   public function get_pixel_colour( $x=0, $y=0 ){
+   	if( !$this->image_resource ) return FALSE;
+   	
+   	$rgb = imagecolorat( $this->image_resource, $x, $y );
+   	$colour_arr = imagecolorsforindex( $this->image_resource, $rgb );
+   	
+   	return $colour_arr;
+   	}
+   }
 ?>
