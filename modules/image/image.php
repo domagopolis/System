@@ -197,5 +197,17 @@ class image{
    	
    	return $colour_arr;
    	}
+   	
+   public function is_portrait(){
+   	if( $this->width < $this->height ) return TRUE;
+   	}
+   
+   public function is_landscape(){
+   	if( $this->width > $this->height ) return TRUE;	
+   	}
+   
+   public function is_square(){
+   	if( $this->width == $this->height ) return TRUE;
+   	}
    }
 ?>
