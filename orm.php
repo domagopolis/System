@@ -476,7 +476,7 @@ class orm{
             }
             
          $value = $this->prepare_data( $value );
-         $field = preg_replace( '/([A-Za-z0-9_]+)([<>=]+| IN)/i', '$1', $key );
+         $field = preg_replace( '/([A-Za-z0-9_]+)([<>=]+| IN| IS)/i', '$1', $key );
          if( preg_match( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).'.$field.' (.*)/i', $join_sql ) ){
             $key_table = preg_replace( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).'.$field.' (.*)/i', '$3.', $join_sql );
          }else if( preg_match( '/(.*) JOIN ([A-Za-z0-9_]+) ON ([A-Za-z0-9_]+).([A-Za-z0-9_]+) = ([A-Za-z0-9_]+).'.$field.' (.*)/i', $join_sql ) ){
@@ -494,6 +494,8 @@ class orm{
                $clause_sql .= $key_table.$field." LIKE '".$value."' ".strtoupper( $boolean_operator )." ";
             }else if( preg_match( '/([A-Za-z0-9_]+)( IN)/i', $key ) ){
                $clause_sql .= $key_table.$field." IN (".$value.") ".strtoupper( $boolean_operator )." ";
+            }else if( preg_match( '/([A-Za-z0-9_]+)( IS)/i', $key ) ){
+               $clause_sql .= $key_table.$field." IS ".$value." ".strtoupper( $boolean_operator )." ";
             }else{
                $clause_sql .= $key_table.$field." = '".$value."' ".strtoupper( $boolean_operator )." ";
                }
