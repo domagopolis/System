@@ -14,7 +14,7 @@ if( is_dir( $document_root_path.'include/models' ) ){
    }
 
 foreach( $files as $file ){
-   if( $file != '.' AND $file != '..' ){
+   if( $file != '.' AND $file != '..' AND strstr( $file, '.php' ) ){
       include($document_root_path.'include/models/'.$file);
       }
    }

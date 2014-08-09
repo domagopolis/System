@@ -180,6 +180,4 @@ class abn_lookup{
       return $this->result;
       }
    }
-   
-   }
 ?>
