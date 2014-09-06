@@ -20,7 +20,10 @@ class ipinfodb{
          return FALSE;
          }
 
-      $this->host = $host;
+      $this->host = FALSE;
+      if( preg_match( '/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\z/', $host ) ){
+         $this->host = $host;
+      }
       $this->key = $key;
       $this->format = $format;
       $this->response = FALSE;

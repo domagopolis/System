@@ -25,7 +25,7 @@ class url{
       return $name;
       }
 
-   public function url_decode_name( $param=NULL ){
+   public static function url_decode_name( $param=NULL ){
 
       $param = urldecode( $param );
       $param = str_replace( "-and-", "-&amp;-", $param );
