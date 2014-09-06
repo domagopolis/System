@@ -36,7 +36,7 @@ class image{
       }
 
    public function load_image( $path=false ){
-   
+
       if( !$path ) return FALSE;
       
       if( validation::validate_url( $path ) ){
