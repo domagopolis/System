@@ -34,6 +34,33 @@ class image{
          return FALSE;
          }
       }
+
+   public function load_image( $path=false ){
+   
+      if( !$path ) return FALSE;
+      
+      if( validation::validate_url( $path ) ){
+         $pathinfo = pathinfo( parse_url( $path, PHP_URL_PATH ) );
+      }else{
+         $path = $_SERVER['DOCUMENT_ROOT'].$path;
+         $pathinfo = pathinfo( $path );
+         }
+      
+      $this->extension = $pathinfo['extension'];
+     
+      switch( $this->extension ) {
+         case "png": $this->image_resource = imagecreatefrompng( $path ); break;
+         case "gif": $this->image_resource = imagecreatefromgif( $path ); break;
+         case "jpg": $this->image_resource = imagecreatefromjpeg( $path ); break;
+         case "jpeg": $this->image_resource = imagecreatefromjpeg( $path ); break;
+         default: return FALSE;
+         }
+         
+      $this->width = imagesx( $this->image_resource );
+      $this->height = imagesy( $this->image_resource );
+
+      return $this->image_resource;
+      }
       
    public function get_image_file_names(){
       return $this->image_file_arr;
