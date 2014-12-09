@@ -150,7 +150,7 @@ class orm{
          //copy objects from class_obj to this instance data record relations with ids as reference
          if( is_array( $id_arr ) AND is_array( $this->{$this->object_data_arr} ) AND is_array( $class_obj->{$class_obj->object_data_arr} ) ){
             foreach( $id_arr as $id1 => $id2_arr ){
-               if( is_array( $id2_arr ) ){
+               if( array_key_exists( $id1, $this->{$this->object_data_arr} ) AND is_array( $id2_arr ) ){
                   foreach( $id2_arr as $id2 ){
                      if( array_key_exists( $id2, $class_obj->{$class_obj->object_data_arr} ) ){
                         $this->{$this->object_data_arr}[$id1]->{$class_obj->object_data_arr} = array();
