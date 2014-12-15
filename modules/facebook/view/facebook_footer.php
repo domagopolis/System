@@ -2,7 +2,7 @@
 <script>
 window.fbAsyncInit = function() {
    FB.init({appId: '<?php echo $this->app_id; ?>', status: true, cookie: true, xfbml: true});
-   FB.Event.subscribe("auth.login", function() {window.location = ''});
+   FB.Event.subscribe("auth.login", function() {location.reload();});
    FB.Event.subscribe("auth.logout", function() {window.location = 'logout.php'});
 };
 (function() {
