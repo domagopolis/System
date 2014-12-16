@@ -1,1 +1,1 @@
-<fb:login-button autologoutlink="true" show-faces="false" width="200" max-rows="1" scope="<?php echo implode( ',',$this->permissions); ?>"></fb:login-button>
+<fb:login-button auto_logout_link="true" show_faces="false" width="200" max_rows="1" scope="<?php echo implode( ',',$this->permissions); ?>" onlogin="checkLoginState();"></fb:login-button>

@@ -1,9 +1,7 @@
 <div id="fb-root"></div>
 <script>
 window.fbAsyncInit = function() {
-   FB.init({appId: '<?php echo $this->app_id; ?>', status: true, cookie: true, xfbml: true});
-   FB.Event.subscribe("auth.login", function() {location.reload();});
-   FB.Event.subscribe("auth.logout", function() {window.location = 'logout.php'});
+	FB.init({appId: '<?php echo $this->app_id; ?>', cookie: true, xfbml: true, version: 'v2.1'});
 };
 (function() {
    var e = document.createElement('script');
@@ -12,4 +10,20 @@ window.fbAsyncInit = function() {
    e.async = true;
    document.getElementById('fb-root').appendChild(e);
 }());
+
+function checkLoginState() {
+	FB.getLoginStatus(function(response) {
+		statusChangeCallback(response);
+	});
+}
+
+function statusChangeCallback(response) {
+	if (response.status === 'connected') {
+		location.reload();
+	} else if (response.status === 'not_authorized') {
+		window.location = '';
+	} else {
+		window.location = 'logout.php';
+	}
+}
 </script>
