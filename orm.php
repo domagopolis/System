@@ -257,6 +257,12 @@ class orm{
             $errors = true;
             }
          }
+
+      if( array_key_exists( 'captcha', $_POST ) AND array_key_exists( 'captcha', $_SESSION ) ){
+         if( $_POST['captcha'] !== $_SESSION['captcha'] ){
+            $errors = true;
+         }
+      }
          
       return $errors;
       }
