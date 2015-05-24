@@ -29,18 +29,37 @@ class google_map{
       }
       
    public function locate( $query=NULL ){
-      $this->url = "http://maps.google.com/maps/geo?output=".$this->type;
-      $this->url .= "&key=".$this->google_api_key;
-      $this->url .= "&q=".urlencode( $query );
+      $this->url = "https://maps.googleapis.com/maps/api/geocode/".$this->type;
+      $this->url .= "?key=".$this->google_api_key;
+      $this->url .= "&address=".urlencode( $query );
       
       if( is_array( $this->search_params ) ){
          foreach( $this->search_params as $key => $value ){
             $this->url .= "&".$key."=".$value;
             }
          }
-         
-      return $this->process();
+      
+      $this->result = $this->process();
+
+      return $this->result;
       }
+
+    public function get_coords(){
+      $coords = array();
+      if( $this->type === 'xml' ){
+        $coords['longitude'] = current( $this->result->result->geometry->location->lng );
+        $coords['latitude'] = current( $this->result->result->geometry->location->lat );
+      }
+      
+      if( $this->type === 'json' ){
+        $coords_str = $this->result->Response->Placemark->Point->coordinates;
+        $coords_str = substr( $coords_str, 0, strlen( $coords_str )-2 );
+        $coords['longitude'] = $this->result->results[0]->geometry->location->lng;
+        $coords['latitude'] = $this->result->results[0]->geometry->location->lat;
+      }
+
+      return $coords;
+    }
       
    // Calculate the distance between two coords in lat/long as the crow flies
    public function calculate_distance( $lat1=FALSE, $long1=FALSE, $lat2=FALSE, $long2=FALSE ){
@@ -122,7 +141,7 @@ class google_map{
         curl_close($ch);
 
         if( intval( $this->responseInfo['http_code'] ) == 200 )
-			return $this->objectify( $response );
+			   return $this->objectify( $response );
         else
             return false;
       }

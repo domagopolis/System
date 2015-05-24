@@ -1,5 +1,5 @@
 <?php global $domain; ?>
-<img src="<?php echo $domain; ?>/system/modules/form_builder/view/captcha_image.php"/>
+<img src="<?php echo $domain; ?>/system/modules/form_builder/view/captcha_image.php" class="captcha-image" />
 <input type="text" name="captcha-text" value="" placeholder="Enter Code Above" autocomplete="off" />
 <?php if( array_key_exists( 'captcha-text', $_POST ) ){ ?>
 <?php if( empty( $_POST['captcha-text'] ) ) { ?>
