@@ -10,6 +10,7 @@ class google_map{
    private $url;
    private $google_api_key;
    private $type;
+   private $result;
    
    public function __construct( $google_api_key=NULL, $type=NULL ){
       $this->google_api_key = $google_api_key;
@@ -46,6 +47,7 @@ class google_map{
 
     public function get_coords(){
       $coords = array();
+      
       if( $this->type === 'xml' ){
         $coords['longitude'] = current( $this->result->result->geometry->location->lng );
         $coords['latitude'] = current( $this->result->result->geometry->location->lat );
