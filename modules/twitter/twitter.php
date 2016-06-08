@@ -11,15 +11,24 @@ class twitter{
    private $type;
    private $username;
    private $password;
+
+   private $oauth_access_token;
+   private $oauth_access_token_secret;
+   private $consumer_key;
+   private $consumer_secret;
    
-   public $search_params;
+   public $params;
 
-   public function __construct( $username=FALSE, $password=FALSE ){
-      $this->username = $username;
-      $this->password = $password;
+   public function __construct( $oauth_access_token=FALSE, $oauth_access_token_secret=FALSE, $consumer_key=FALSE, $consumer_secret=FALSE ){
+      $this->oauth_access_token = $oauth_access_token;
+      $this->oauth_access_token_secret = $oauth_access_token_secret;
+      $this->consumer_key = $consumer_key;
+      $this->consumer_secret = $consumer_secret;
 
-      $this->search_params['lang'] = "en";
-      $this->search_params['geocode'] = NULL;
+      $this->url = 'https://api.twitter.com/1.1/';
+
+      $this->params['lang'] = "en";
+      $this->params['geocode'] = NULL;
       }
 
    public function __get( $property ){
@@ -29,37 +38,36 @@ class twitter{
          return FALSE;
          }
       }
+
+    public function login( $username=FALSE, $password=FALSE ){
+      $this->username = $username;
+      $this->password = $password;
+    }
       
-   public function rpp( $rpp=15 ){
-      $this->search_params['rpp'] = $rpp; //int the number of tweets to return per page, max 100
+   public function rpp( $count=15 ){
+      $this->params['count'] = $count; //int the number of tweets to return per page, max 100
       return $this;
       }
       
    public function geocode($lat, $long, $radius, $units='mi') {
-      $this->search_params['geocode'] = $lat.','.$long.','.$radius.$units;
+      $this->params['geocode'] = $lat.','.$long.','.$radius.$units;
       return $this;
       }
       
    public function set_lang( $iso2 = 'en' ){
-      $this->search_params['lang'] = $iso2;
+      $this->params['lang'] = $iso2;
       return $this;
       }
       
    public function search( $query=FALSE ){
       $this->type = 'json';
-      $this->url = "http://search.twitter.com/search.".$this->type.'?';
+      $this->url .= "search/tweets.".$this->type;
       if( $query ){
-         $this->url .= 'q='.urlencode( $query ).'&';
+         $this->params['q'] = urlencode( $query );
       }else if( $this->username ){
-         $this->url .= 'from='.urlencode( $this->username ).'&';
+         $this->params['from'] = urlencode( $this->username );
       }else{
          return FALSE;
-         }
-      
-      if( is_array( $this->search_params ) ){
-         foreach( $this->search_params as $key => $value ){
-            $this->url .= "&".$key."=".$value;
-            }
          }
 
       return ( $results = $this->process() )? $results->results:FALSE;
@@ -78,36 +86,88 @@ class twitter{
 
       return $this->process();
       }
+
+  private function append_params(){
+    $params_str = '';
+
+    if( is_array( $this->params ) ){
+       foreach( $this->params as $key => $value ){
+          if( strstr( $params_str, '?' ) ){
+            $params_str .= "&".$key."=".$value;
+          }else{
+            $params_str = "?".$key."=".$value;
+            }
+          }
+       }
+
+    return $params_str;
+  }
+
+  private function build_base_string( $method, $params ){
+    $r = array();
+    ksort( $params );
+    foreach( $params as $key=>$value ){
+      $r[] = "$key=".rawurlencode( $value );
+    }
+    return $method.'&'.rawurlencode( $this->url ).'&'.rawurlencode( implode( '&', $r ) );
+  }
+
+  private function build_authorization_header( $oauth ){
+    $r = 'Authorization: OAuth ';
+    $values = array();
+    foreach( $oauth as $key => $value ){
+      $values[] = "$key=\"".rawurlencode( $value )."\"";
+    }
+    $r .= implode( ', ', $values );
+    return $r;
+  }
    
    private function process( $postargs=false ){
 
-		$ch = curl_init($this->url);
-		
-		if($this->postargs !== false){
-			curl_setopt ($ch, CURLOPT_POST, true);
-			curl_setopt ($ch, CURLOPT_POSTFIELDS, $this->postargs);
-            }
+    $oauth = array(
+      'oauth_consumer_key' => $this->consumer_key,
+      'oauth_nonce' => time(),
+      'oauth_signiture_method' => 'HMAC-SHA1',
+      'oauth_token' => $this->oauth_access_token,
+      'oauth_timestamp' => time(),
+      'oauth_version' => '1.0',
+      );
 
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
-        curl_setopt($ch, CURLOPT_NOBODY, 0);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $base_info = $this->build_base_string( 'GET', $oauth );
+    $composite_key = rawurlencode( $this->consumer_secret ).'&'.rawurlencode( $this->oauth_access_token_secret );
+    $oauth_signiture = base64_encode( hash_hmac( 'sha1', $base_info, $composite_key, true ) );
+    $oauth['oauth_signiture'] = $oauth_signiture;
 
-        if( !empty($this->username ) AND !empty( $this->password ) ){
-            curl_setopt($ch, CURLOPT_USERPWD, $this->username.":".$this->password);
-            }
+    $header = array( $this->build_authorization_header( $oauth ), 'Expect:' );
+    $options = array(
+      'CURLOPT_HTTPHEADER' => $header,
+      'CURLOPT_HEADER' => false,
+      'CURLOPT_URL' => $this->url.$this->append_params(),
+      'CURLOPT_RETURNTRANSFER' => true,
+      //'CURLOPT_SSL_VERIFYPEER' => false,
+      );
 
-        $response = curl_exec($ch);
+    if($this->postargs !== false){
+      $options['CURLOPT_POSTFIELDS'] = $this->postargs;
+    }
 
-        $this->responseInfo=curl_getinfo($ch);
-        curl_close($ch);
+    $ch = curl_init();
+    
+    curl_setopt_array( $ch, $options );
 
-        if( intval( $this->responseInfo['http_code'] ) == 200 )
-			return $this->objectify( $response );
-        else
-            return FALSE;
+    if( !empty($this->username ) AND !empty( $this->password ) ){
+        curl_setopt($ch, CURLOPT_USERPWD, $this->username.":".$this->password);
+        }
+
+    $response = curl_exec($ch);
+
+    $this->responseInfo=curl_getinfo($ch);
+    curl_close($ch);
+
+    if( intval( $this->responseInfo['http_code'] ) == 200 )
+     return $this->objectify( $response );
+    else
+      return FALSE;
       }
       
    private function objectify($data){
@@ -126,6 +186,10 @@ class twitter{
          }
       }
       
+   public static function link_account( $username ){
+    return '<a href="http://www.twitter.com/'.$username.'" target="_blank" id="'.$username.'_twitter_link" class="twitter_link">@'.$username.'</a>';
+   }
+
    public static function format_text( $text ){
       $text = html_entity_decode($text);
       $text = preg_replace("/http:\/\/([A-Za-z0-9_\-.?=&\/]+)/i", '<a href="http://$1" target="_blank">http://$1</a>', $text);
