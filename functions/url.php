@@ -23,7 +23,6 @@ class url{
       $name = str_replace( "&", "and", $name );
       $name = urlencode( $name );
 
-
       return $name;
       }
 
