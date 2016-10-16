@@ -1,7 +1,13 @@
 <?php
-if (session_status() == PHP_SESSION_NONE) {
+list($session_id, $ext) = explode('-', $_GET['session_id']);
+
+if( session_id( $session_id ) == '' ) {
     session_start();
+    if( isset( $_SESSION['extids'][$ext] ) ) {
+    	unset( $_SESSION['extids'][$ext] );
+    }
 }
+
 $chars = 'abcdefghijklmnopqrstuvwxyz1234567890';
 $random_str = '';
 $size = 6;
