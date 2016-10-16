@@ -15,6 +15,7 @@ class url{
 
    public static function url_encode_name( $name=NULL ){
 
+      //Try preg_replace( '/[^A-Za-z0-9-]+/', '-', strtolower( $name ) );
       $name = strtolower( $name );
       $name = str_replace( "-", "_", $name );
       $name = str_replace( " ", "-", $name );
