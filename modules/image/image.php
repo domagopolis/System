@@ -16,6 +16,8 @@ class image{
    private $extension;
    
    private $file_data_arr = array();
+
+   private $image_resource;
    
    /**
    * params $file_data_arr $_FILES single server file data
@@ -197,6 +199,20 @@ class image{
       }
    }
 
+   public function create_image( $height=0, $width=0 ){
+      $this->image_resource = imagecreatetruecolor( $width, $height );
+   }
+
+   public function set_image_pixel( $x=0, $y=0, $r=0, $g=0, $b=0 ){
+      $colour = imagecolorallocate( $this->image_resource, $r, $g, $b );
+      imagesetpixel($this->image_resource, $x, $y, $colour);
+   }
+
+   public function output_png(){
+      header('Content-Type: image/png');
+      imagepng( $this->image_resource );
+   }
+
    public function get_image_extension(){
       return $this->extension;
    }
@@ -217,13 +233,40 @@ class image{
       }
    	
    public function get_pixel_colour( $x=0, $y=0 ){
-   	if( !$this->image_resource ) return FALSE;
-   	
-   	$rgb = imagecolorat( $this->image_resource, $x, $y );
-   	$colour_arr = imagecolorsforindex( $this->image_resource, $rgb );
-   	
-   	return $colour_arr;
+      if( !$this->image_resource ) return FALSE;
+
+      $rgb = imagecolorat( $this->image_resource, $x, $y );
+      $colour_arr = imagecolorsforindex( $this->image_resource, $rgb );
+
+      return $colour_arr;
    	}
+
+   public function get_pixel_colour_int( $x=0, $y=0 ){
+      if( !$this->image_resource ) return FALSE;
+
+      $rgb = imagecolorat( $this->image_resource, $x, $y );
+
+      return $rgb;
+      }
+
+   public function get_hex_colour( $x=0, $y=0 ){
+      if( !$this->image_resource ) return FALSE;
+
+      $rgb = imagecolorat( $this->image_resource, $x, $y );
+      $r = ($rgb >> 16) & 0xFF;
+      $g = ($rgb >> 8) & 0xFF;
+      $b = $rgb & 0xFF;
+
+      return '#'.str_pad( dechex($r), 2, 0, STR_PAD_LEFT ).str_pad( dechex($g), 2, 0, STR_PAD_LEFT ).str_pad( dechex($b), 2, 0, STR_PAD_LEFT );
+   }
+
+   public function get_width(){
+      return $this->width;
+   }
+
+   public function get_height(){
+      return $this->height;
+   }
    	
    public function is_portrait(){
    	if( $this->width < $this->height ) return TRUE;
