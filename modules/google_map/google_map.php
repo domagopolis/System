@@ -64,7 +64,7 @@ class google_map{
     }
       
    // Calculate the distance between two coords in lat/long as the crow flies
-   public function calculate_distance( $lat1=FALSE, $long1=FALSE, $lat2=FALSE, $long2=FALSE ){
+   public function calculate_distance( $lat1=FALSE, $lon1=FALSE, $lat2=FALSE, $lon2=FALSE ){
       $R = 6371; // km
       $dLat = deg2rad( $lat2 - $lat1 );
       $dLon = deg2rad( $lon2 - $lon1 );
